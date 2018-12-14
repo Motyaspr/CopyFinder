@@ -21,6 +21,7 @@
 #include <QDir>
 #include <fstream>
 #include <iostream>
+#include <QTime>
 
 
 
@@ -43,6 +44,7 @@ private:
     QString root;
     void get_duplicates();
     QVector<QString> curans;
+    QTime t;
 };
 
 #endif // COUNTER_H

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <memory>
 #include <QThread>
+#include <QTime>
 
 #include <counter.h>
 
@@ -32,6 +33,7 @@ signals:
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     Counter *counter = nullptr;
+    QTime t;
 };
 
 #endif // MAINWINDOW_H

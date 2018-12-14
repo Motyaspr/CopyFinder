@@ -7,7 +7,8 @@
 #include <QDir>
 #include <QtWidgets>
 #include <QLocale>
-
+#include <QTime>
+#include <QColor>
 
 main_window::main_window(QWidget *parent)
     : QMainWindow(parent)
@@ -50,6 +51,7 @@ void main_window::select_directory()
     if (dir.size() == 0) {
         return;
     }
+    t.start();
     ui->treeWidget->clear();
     setWindowTitle(QString("Duplicates in directory - %1").arg(dir));
     counter = new Counter(dir);
@@ -68,6 +70,7 @@ void main_window::select_directory()
     connect(counter, &Counter::finish, this, &main_window::show_result);
     ui->actionScan_Directory->setDisabled(true);
     ui->actionStop->setHidden(false);
+    ui->actionDelete->setHidden(true);
     searchThread.start();
     find_duplicates(dir);
 }
@@ -98,11 +101,11 @@ void main_window::delete_items() {
             QString path = item->text(0);
             QFile file(path);
             if (file.remove()) {
-                if (item->parent()->childCount() == 1){
+                if (item->parent()->childCount() == 2){
                     delete item->parent();
                     //item->parent()->removeChild(item);
                 } else {
-                    item->parent()->setText(0, QString("There is " + QString::number(item->parent()->childCount() - 1) + " files"));
+                    item->parent()->setText(0, QString("There are " + QString::number(item->parent()->childCount() - 1) + " files"));
                     item->parent()->removeChild(item);
                 }
             }
@@ -116,6 +119,8 @@ void main_window::show_result()
 {
     ui->actionDelete->setHidden(false);
     ui->actionStop->setHidden(true);
+    ui->actionScan_Directory->setDisabled(false);
+    show_status("Finished in " + QString::number(t.elapsed()) + "ms");
     searchThread.quit();
     searchThread.wait();
 }
@@ -133,9 +138,12 @@ void main_window::show_about_dialog() {
 
 
 void main_window::show_status(QString const &txt) {
-    ui->treeWidget->clear();
-    QTreeWidgetItem *status_item = new QTreeWidgetItem(ui->treeWidget);
-    status_item->setText(0, txt);
+    if (ui->treeWidget->topLevelItemCount() == 0){
+        ui->actionDelete->setHidden(true);
+        QTreeWidgetItem *status_item = new QTreeWidgetItem(ui->treeWidget);
+        status_item->setText(0, txt);
+        ui->treeWidget->addTopLevelItem(status_item);
+    } else{
+        ui->treeWidget->topLevelItem(0)->setText(0, txt);
+    }
 }
-
-

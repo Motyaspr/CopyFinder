@@ -6,6 +6,7 @@ const long long MAXN = 5;
 
 void Counter::get_duplicates()
 {
+
     QString dir = this->root;
     emit send_status("RUN");
     QMap<qint64, QVector<QString>> groups;
@@ -61,7 +62,7 @@ void Counter::get_duplicates()
 
 
     }
-    //emit send_status("Finished");
+    //emit send_status("Finished" + QString::number(t.elapsed()) + "ms");
     emit finish();
 
 }
