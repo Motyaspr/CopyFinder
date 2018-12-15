@@ -34,7 +34,11 @@ void Counter::get_duplicates() {
         QMap <QString, QVector<QString>> small_groups;
         qint64 sz = it.key();
         for (QString file : it.value()) {
-            small_groups[get_first_k(file, std::min(sz, MAXN))].push_back(file);
+            try{
+                small_groups[get_first_k(file, std::min(sz, MAXN))].push_back(file);
+            } catch(QString&){
+                current++;
+            }
         }
         if (QThread::currentThread()->isInterruptionRequested()) {
             emit send_progress(get_percent());
@@ -53,7 +57,11 @@ void Counter::get_duplicates() {
             }
             QMap <QByteArray, QVector<QString>> final_groups;
             for (QString file : it.value()) {
-                final_groups[get_hash(file)].push_back(file);
+                try{
+                    final_groups[get_hash(file)].push_back(file);
+                } catch(QString&){
+                    current++;
+                }
             }
             for (auto it2 = final_groups.begin(); it2 != final_groups.end(); ++it2) {
                 if (it2.value().size() == 1){
@@ -96,19 +104,21 @@ void Counter::doSearch(const QString &dir) {
 QByteArray Counter::get_hash(const QString &filepath) {
     QCryptographicHash sha(QCryptographicHash::Sha256);
     QFile file(filepath);
+
     if (file.open(QIODevice::ReadOnly)) {
         sha.addData(file.readAll());
+        return sha.result();
     }
-    return sha.result();
+    throw QString("File is not open");
 }
 
 QString Counter::get_first_k(QString const &filepath, qint64 x) {
     QFile file(filepath);
     if (file.open(QIODevice::ReadOnly)) {
         QString s = file.read(x);
-
         return s;
     }
+    throw QString("File is not open");
 }
 
 
