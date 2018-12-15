@@ -22,7 +22,7 @@ main_window::main_window(QWidget *parent)
     ui->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     QCommonStyle style;
-    setWindowTitle(QString("DupSearch"));
+    setWindowTitle(QString("CopyFinder"));
     ui->actionScan_Directory->setIcon(style.standardIcon(QCommonStyle::SP_MediaPlay));
     ui->actionExit->setIcon(style.standardIcon(QCommonStyle::SP_DialogCloseButton));
     ui->actionAbout->setIcon(style.standardIcon(QCommonStyle::SP_DialogHelpButton));
@@ -34,6 +34,7 @@ main_window::main_window(QWidget *parent)
     connect(ui->actionDelete, SIGNAL(released()), SLOT(delete_items()));
     ui->actionDelete->setHidden(true);
     ui->actionStop->setHidden(true);
+    ui->progressBar->setHidden(true);
  //   scan_directory(QDir::homePath());
 }
 
@@ -57,9 +58,11 @@ void main_window::select_directory()
     setWindowTitle(QString("Duplicates in directory - %1").arg(dir));
     counter = new Counter(dir);
     counter->moveToThread(&Thread);
+    ui->progressBar->setRange(0, 100);
     qRegisterMetaType<QVector<QString>>("QVector<QString>");
     connect(&Thread, &QThread::finished, counter, &QObject::deleteLater);
     connect(this, &main_window::find_duplicates, counter, &Counter::doSearch);
+    connect(counter, SIGNAL(send_progress(qint16)), this, SLOT(show_progress(qint16)));
     connect(counter,
                          SIGNAL(send_duplicates(QVector<QString> const &)),
                          this,
@@ -72,6 +75,9 @@ void main_window::select_directory()
     ui->actionScan_Directory->setDisabled(true);
     ui->actionStop->setHidden(false);
     ui->actionDelete->setHidden(true);
+    ui->progressBar->setHidden(false);
+    ui->progressBar->setValue(0);
+    ui->progressBar->setTextVisible(true);
     Thread.start();
     find_duplicates(dir);
 }
@@ -126,7 +132,7 @@ void main_window::show_result()
     ui->actionDelete->setHidden(false);
     ui->actionStop->setHidden(true);
     ui->actionScan_Directory->setDisabled(false);
-    show_status("Finished in " + QString::number(t.elapsed()) + "ms");
+    show_status("Finished in " + QString::number(t.elapsed()) + " ms");
     Thread.quit();
     Thread.wait();
 }
@@ -134,6 +140,12 @@ void main_window::show_result()
 void main_window::stop_search()
 {
     Thread.requestInterruption();
+}
+
+void main_window::show_progress(qint16 x)
+{
+    ui->progressBar->setFormat(QString::number(x)+"%");
+    ui->progressBar->setValue(x);
 }
 
 void main_window::show_about_dialog() {

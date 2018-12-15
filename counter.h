@@ -38,13 +38,17 @@ signals:
     void send_duplicates(QVector<QString> const &);
     void send_status(QString const &);
     void finish();
+    void send_progress(qint16);
 private:
     QByteArray get_hash(QString const& filepath);
     QString get_first_k(QString const& filepath, qint64 k);
     QString root;
+    qint64 current;
+    qint64 total;
     void get_duplicates();
     QVector<QString> curans;
     QTime t;
+    qint16 get_percent();
 };
 
 #endif // COUNTER_H

@@ -28,6 +28,25 @@
      <number>0</number>
     </property>
     <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="value">
+       <number>24</number>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="textDirection">
+       <enum>QProgressBar::TopToBottom</enum>
+      </property>
+      <property name="format">
+       <string>%p%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTreeWidget" name="treeWidget">
       <attribute name="headerMinimumSectionSize">
        <number>100</number>

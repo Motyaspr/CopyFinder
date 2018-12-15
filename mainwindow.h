@@ -30,6 +30,7 @@ public slots:
     void show_result();
     void stop_search();
 //    void select_all();
+    void show_progress(qint16);
 signals:
     void find_duplicates(QString const& dir);
 private:
