@@ -117,7 +117,7 @@ void main_window::delete_items() {
                     delete item->parent();
                     //item->parent()->removeChild(item);
                 } else {
-                    item->parent()->setText(0, QString("There are " + QString::number(item->parent()->childCount() - 1) + " files"));
+                    item->parent()->setText(0, QString("There is " + QString::number(item->parent()->childCount() - 1) + " files"));
                     item->parent()->removeChild(item);
                 }
             }
