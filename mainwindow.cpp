@@ -110,7 +110,7 @@ void main_window::delete_items() {
                                                                 "Do you want to delete selected files?");
     if (dialog == QMessageBox::Yes){
          for (auto item : sel_items) {
-            QString path = my_dir + item->text(0);
+            QString path = my_dir + '/' + item->text(0);
             QFile file(path);
             if (file.remove()) {
                 if (item->parent()->childCount() == 2){
