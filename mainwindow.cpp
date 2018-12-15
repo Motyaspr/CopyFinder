@@ -39,8 +39,8 @@ main_window::main_window(QWidget *parent)
 
 main_window::~main_window()
 {
-    searchThread.exit();
-    searchThread.wait();
+    Thread.exit();
+    Thread.wait();
 }
 
 void main_window::select_directory()
@@ -51,13 +51,14 @@ void main_window::select_directory()
     if (dir.size() == 0) {
         return;
     }
+    my_dir = dir;
     t.start();
     ui->treeWidget->clear();
     setWindowTitle(QString("Duplicates in directory - %1").arg(dir));
     counter = new Counter(dir);
-    counter->moveToThread(&searchThread);
+    counter->moveToThread(&Thread);
     qRegisterMetaType<QVector<QString>>("QVector<QString>");
-    connect(&searchThread, &QThread::finished, counter, &QObject::deleteLater);
+    connect(&Thread, &QThread::finished, counter, &QObject::deleteLater);
     connect(this, &main_window::find_duplicates, counter, &Counter::doSearch);
     connect(counter,
                          SIGNAL(send_duplicates(QVector<QString> const &)),
@@ -71,7 +72,7 @@ void main_window::select_directory()
     ui->actionScan_Directory->setDisabled(true);
     ui->actionStop->setHidden(false);
     ui->actionDelete->setHidden(true);
-    searchThread.start();
+    Thread.start();
     find_duplicates(dir);
 }
 
@@ -85,11 +86,16 @@ void main_window::show_duplicates(QVector<QString> const &duplicates)
     item->setText(1, QString::number(file_info.size()) + QString(" bytes"));
     for (QString file : duplicates){
         QTreeWidgetItem* childItem = new QTreeWidgetItem();
-        childItem->setText(0, file);
+        QString rel_path = "";
+        for (int i = my_dir.size() + 1; i < file.size(); i++)
+            rel_path += file[i];
+        childItem->setText(0, rel_path);
         item->addChild(childItem);
     }
     ui->treeWidget->addTopLevelItem(item);
 }
+
+
 
 
 void main_window::delete_items() {
@@ -97,8 +103,8 @@ void main_window::delete_items() {
     QMessageBox::StandardButton dialog = QMessageBox::question(this, "Deleting",
                                                                 "Do you want to delete selected files?");
     if (dialog == QMessageBox::Yes){
-        for (auto item : sel_items) {
-            QString path = item->text(0);
+         for (auto item : sel_items) {
+            QString path = my_dir + item->text(0);
             QFile file(path);
             if (file.remove()) {
                 if (item->parent()->childCount() == 2){
@@ -121,13 +127,13 @@ void main_window::show_result()
     ui->actionStop->setHidden(true);
     ui->actionScan_Directory->setDisabled(false);
     show_status("Finished in " + QString::number(t.elapsed()) + "ms");
-    searchThread.quit();
-    searchThread.wait();
+    Thread.quit();
+    Thread.wait();
 }
 
 void main_window::stop_search()
 {
-    searchThread.requestInterruption();
+    Thread.requestInterruption();
 }
 
 void main_window::show_about_dialog() {

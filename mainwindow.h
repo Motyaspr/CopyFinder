@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QTime>
 
+
 #include <counter.h>
 
 namespace Ui {
@@ -15,7 +16,7 @@ class MainWindow;
 class main_window : public QMainWindow
 {
 Q_OBJECT
-    QThread searchThread;
+    QThread Thread;
 public:
     explicit main_window(QWidget *parent = 0);
     ~main_window();
@@ -28,12 +29,14 @@ public slots:
     void delete_items();
     void show_result();
     void stop_search();
+//    void select_all();
 signals:
     void find_duplicates(QString const& dir);
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     Counter *counter = nullptr;
     QTime t;
+    QString my_dir;
 };
 
 #endif // MAINWINDOW_H
